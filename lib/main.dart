@@ -1,5 +1,4 @@
-import 'package:coba_project_prak/screens/home_screen.dart';
-import 'package:coba_project_prak/theme/app_theme.dart';
+import 'package:coba_project_prak/screens/main_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,12 +12,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Whatnime',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      title: 'Whatnime',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: MainPage(),
     );
   }
 }
