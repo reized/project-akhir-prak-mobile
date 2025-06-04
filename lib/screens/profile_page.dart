@@ -156,40 +156,6 @@ class ProfilePage extends StatelessWidget {
                           );
                         },
                       ),
-                      const SizedBox(height: 16),
-                      _buildMenuOption(
-                        context,
-                        icon: Icons.history,
-                        title: 'Riwayat Pencarian',
-                        subtitle: 'Lihat riwayat pencarian anime',
-                        color: Colors.blue,
-                        onTap: () {
-                          // TODO: Implement search history
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Fitur akan segera hadir!'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      _buildMenuOption(
-                        context,
-                        icon: Icons.settings,
-                        title: 'Pengaturan',
-                        subtitle: 'Ubah pengaturan aplikasi',
-                        color: Colors.grey,
-                        onTap: () {
-                          // TODO: Implement settings
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Fitur akan segera hadir!'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),
