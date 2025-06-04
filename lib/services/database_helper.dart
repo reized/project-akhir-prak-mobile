@@ -54,7 +54,6 @@ class DatabaseHelper {
     try {
       final db = await database;
 
-      // Check if username already exists
       final existing = await db.query(
         'users',
         where: 'username = ?',
@@ -62,7 +61,7 @@ class DatabaseHelper {
       );
 
       if (existing.isNotEmpty) {
-        return false; // Username already exists
+        return false; 
       }
 
       final user = User(
@@ -120,14 +119,34 @@ class DatabaseHelper {
       return null;
     }
   }
+  
+  // Verify user's current password
+  Future<bool> verifyPassword(int userId, String password) async {
+    try {
+      final db = await database;
+      final hashedPassword = _hashPassword(password);
+      final maps = await db.query(
+        'users',
+        columns: ['id'],
+        where: 'id = ? AND password = ?',
+        whereArgs: [userId, hashedPassword],
+      );
+      return maps.isNotEmpty;
+    } catch (e) {
+      print('Error verifying password: $e');
+      return false;
+    }
+  }
 
-  // Update user
+  // Update user (can update email and/or password)
   Future<bool> updateUser(User user) async {
     try {
       final db = await database;
+      // Ensure the password in the user object is hashed if it's being changed
+      // The AuthService should handle providing the correctly hashed password in the User object
       final result = await db.update(
         'users',
-        user.toMap(),
+        user.toMap(), // User object should contain new email and/or new hashed password
         where: 'id = ?',
         whereArgs: [user.id],
       );

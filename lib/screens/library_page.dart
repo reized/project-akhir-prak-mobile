@@ -118,9 +118,9 @@ class _LibraryPageState extends State<LibraryPage> {
       _allAnime.clear();
       _currentPage = 1;
       _hasMore = true;
-      _isLoadingMore = false; 
+      _isLoadingMore = false;
     });
-    _loadAllAnime(); 
+    _loadAllAnime();
   }
 
   @override
@@ -264,15 +264,11 @@ class _LibraryPageState extends State<LibraryPage> {
 
         final animeList = snapshot.data!;
         return SizedBox(
-          height:
-              260, 
+          height: 260,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: animeList.length,
-            padding: const EdgeInsets.symmetric(
-                horizontal: 8.0, 
-                vertical: 8.0 
-                ),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
             itemBuilder: (context, index) {
               return JikanAnimeCard(anime: animeList[index], compactMode: true);
             },
@@ -291,7 +287,7 @@ class _LibraryPageState extends State<LibraryPage> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.55,
+        childAspectRatio: 0.53,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../models/anime_jikan_model.dart'; // Pastikan path ini benar
-import '../screens/anime_detail_page.dart'; // Pastikan path ini benar
+import '../models/anime_jikan_model.dart'; 
+import '../screens/anime_detail_page.dart';
 
 class JikanAnimeCard extends StatelessWidget {
   final Anime anime;
@@ -29,14 +29,14 @@ class JikanAnimeCard extends StatelessWidget {
       },
       child: Card(
         clipBehavior: Clip
-            .antiAlias, // Sudah bagus untuk memotong konten sesuai bentuk Card
+            .antiAlias, 
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 4,
         margin: compactMode
             ? const EdgeInsets.symmetric(
-                horizontal: 8) // Margin untuk item di carousel
+                horizontal: 8) 
             : const EdgeInsets.symmetric(
-                horizontal: 8, vertical: 8), // Margin untuk item di grid
+                horizontal: 8, vertical: 8), 
 
         child: compactMode
             ? SizedBox(
@@ -45,9 +45,6 @@ class JikanAnimeCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Gambar akan mengisi sebagian besar ruang yang tersedia di carousel item
-                    // Tinggi gambar di compact mode akan ditentukan oleh parent (ListView di _buildAnimeCarousel)
-                    // dan Expanded akan mengisi ruang tersebut.
                     Expanded(
                       flex: 7, // Beri lebih banyak ruang untuk gambar
                       child: ClipRRect(
