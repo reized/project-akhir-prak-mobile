@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import '../models/anime_jikan_model.dart';
 import '../widgets/jikan_anime_card.dart';
 import '../services/auth_service.dart';
+import '../services/bookmark_service.dart';
 
 class BookmarkListPage extends StatefulWidget {
   const BookmarkListPage({super.key});
@@ -15,6 +14,7 @@ class BookmarkListPage extends StatefulWidget {
 class _BookmarkListPageState extends State<BookmarkListPage> {
   List<Anime> _bookmarkedAnime = [];
   bool _isLoading = true;
+  final BookmarkService _bookmarkService = BookmarkService();
 
   @override
   void initState() {
@@ -22,64 +22,34 @@ class _BookmarkListPageState extends State<BookmarkListPage> {
     _loadBookmarks();
   }
 
-  String _getUserSpecificKey(String baseKey) {
-    final authService = AuthService();
-    final currentUser = authService.currentUser;
-    if (currentUser != null) {
-      return '${baseKey}_${currentUser.username}';
-    }
-    return baseKey; // Fallback jika tidak ada user
-  }
-
   Future<void> _loadBookmarks() async {
     setState(() {
       _isLoading = true;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    final userDetailedBookmarkKey = _getUserSpecificKey('detailed_bookmarks');
-    final List<String> detailedBookmarksJson =
-        prefs.getStringList(userDetailedBookmarkKey) ?? [];
-
-    List<Anime> loadedBookmarks = [];
-    for (String jsonString in detailedBookmarksJson) {
-      try {
-        loadedBookmarks
-            .add(Anime.fromLocalStorageJson(json.decode(jsonString)));
-      } catch (e) {
-        print('Error parsing bookmark: $e');
-      }
-    }
+    final bookmarks = await _bookmarkService.getAllBookmarks();
 
     setState(() {
-      _bookmarkedAnime = loadedBookmarks;
+      _bookmarkedAnime = bookmarks;
       _isLoading = false;
     });
   }
 
-  void _removeBookmark(int malId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final userBookmarkKey = _getUserSpecificKey('bookmarked_anime');
-    final userDetailedBookmarkKey = _getUserSpecificKey('detailed_bookmarks');
+  Future<void> _removeBookmark(int malId) async {
+    final success = await _bookmarkService.removeBookmark(malId);
 
-    List<String> bookmarks = prefs.getStringList(userBookmarkKey) ?? [];
-    bookmarks.remove(malId.toString());
-    await prefs.setStringList(userBookmarkKey, bookmarks);
-
-    List<String> detailedBookmarks =
-        prefs.getStringList(userDetailedBookmarkKey) ?? [];
-    detailedBookmarks.removeWhere((item) {
-      final Map<String, dynamic> itemJson = json.decode(item);
-      return itemJson['mal_id'] == malId;
-    });
-    await prefs.setStringList(userDetailedBookmarkKey, detailedBookmarks);
-
-    setState(() {
-      _bookmarkedAnime.removeWhere((anime) => anime.malId == malId);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dihapus dari Bookmark!')),
-    );
+    if (success) {
+      setState(() {
+        _bookmarkedAnime.removeWhere((anime) => anime.malId == malId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dihapus dari Bookmark!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal menghapus bookmark')),
+      );
+    }
   }
 
   @override

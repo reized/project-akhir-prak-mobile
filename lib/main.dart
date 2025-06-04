@@ -1,6 +1,7 @@
 import 'package:coba_project_prak/screens/main_page.dart';
 import 'package:coba_project_prak/screens/login_page.dart';
 import 'package:coba_project_prak/services/auth_service.dart';
+import 'package:coba_project_prak/services/bookmark_service.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -9,6 +10,12 @@ void main() async {
   // Initialize AuthService
   final authService = AuthService();
   await authService.init();
+
+  // Migrate old bookmarks if user is logged in
+  if (authService.isLoggedIn) {
+    final bookmarkService = BookmarkService();
+    await bookmarkService.migrateOldBookmarks();
+  }
 
   runApp(MyApp(isLoggedIn: authService.isLoggedIn));
 }

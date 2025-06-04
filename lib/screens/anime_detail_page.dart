@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import '../models/anime_jikan_model.dart';
 import '../services/jikan_api.dart';
-import '../services/auth_service.dart';
+import '../services/bookmark_service.dart';
 
 class AnimeDetailPage extends StatefulWidget {
   final int animeId;
@@ -19,7 +17,8 @@ class AnimeDetailPage extends StatefulWidget {
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
   late Future<Anime> _animeDetailsFuture;
   bool _isBookmarked = false;
-  Anime? _anime; // To store the fetched anime object
+  Anime? _anime;
+  final BookmarkService _bookmarkService = BookmarkService();
 
   @override
   void initState() {
@@ -28,65 +27,38 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
     _checkBookmarkStatus();
   }
 
-  String _getUserSpecificKey(String baseKey) {
-    final authService = AuthService();
-    final currentUser = authService.currentUser;
-    if (currentUser != null) {
-      return '${baseKey}_${currentUser.username}';
-    }
-    return baseKey; // Fallback jika tidak ada user
-  }
-
   Future<void> _checkBookmarkStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userBookmarkKey = _getUserSpecificKey('bookmarked_anime');
-    final bookmarks = prefs.getStringList(userBookmarkKey) ?? [];
+    final isBookmarked = await _bookmarkService.isBookmarked(widget.animeId);
     setState(() {
-      _isBookmarked = bookmarks.contains(widget.animeId.toString());
+      _isBookmarked = isBookmarked;
     });
   }
 
   Future<void> _toggleBookmark() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userBookmarkKey = _getUserSpecificKey('bookmarked_anime');
-    final userDetailedBookmarkKey = _getUserSpecificKey('detailed_bookmarks');
+    if (_anime == null) return;
 
-    List<String> bookmarks = prefs.getStringList(userBookmarkKey) ?? [];
+    final success = await _bookmarkService.toggleBookmark(_anime!);
 
-    if (_isBookmarked) {
-      bookmarks.remove(widget.animeId.toString());
-      if (_anime != null) {
-        // Also remove from detailed bookmark list if exists
-        List<String> detailedBookmarks =
-            prefs.getStringList(userDetailedBookmarkKey) ?? [];
-        detailedBookmarks.removeWhere((item) {
-          final Map<String, dynamic> itemJson = json.decode(item);
-          return itemJson['mal_id'] == _anime!.malId;
-        });
-        await prefs.setStringList(userDetailedBookmarkKey, detailedBookmarks);
-      }
+    if (success) {
+      setState(() {
+        _isBookmarked = !_isBookmarked;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isBookmarked
+              ? 'Ditambahkan ke Bookmark!'
+              : 'Dihapus dari Bookmark!'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
     } else {
-      bookmarks.add(widget.animeId.toString());
-      if (_anime != null) {
-        // Add detailed info for displaying in profile page
-        List<String> detailedBookmarks =
-            prefs.getStringList(userDetailedBookmarkKey) ?? [];
-        detailedBookmarks.add(json.encode(_anime!.toJson()));
-        await prefs.setStringList(userDetailedBookmarkKey, detailedBookmarks);
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal mengubah bookmark'),
+          duration: Duration(seconds: 1),
+        ),
+      );
     }
-    await prefs.setStringList(userBookmarkKey, bookmarks);
-    setState(() {
-      _isBookmarked = !_isBookmarked;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isBookmarked
-            ? 'Ditambahkan ke Bookmark!'
-            : 'Dihapus dari Bookmark!'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
   }
 
   Future<void> _launchURL(String url) async {
@@ -126,7 +98,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
             return const Center(child: Text('Anime tidak ditemukan.'));
           }
 
-          _anime = snapshot.data; // Store the fetched anime
+          _anime = snapshot.data;
           final anime = snapshot.data!;
 
           return SingleChildScrollView(
