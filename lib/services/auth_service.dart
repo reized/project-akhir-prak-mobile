@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert'; // Import for utf8
-import 'package:crypto/crypto.dart'; // Import for sha256
+import 'dart:convert'; 
+import 'package:crypto/crypto.dart'; 
 import '../models/user_model.dart';
 import 'database_helper.dart';
 import 'bookmark_service.dart';
@@ -21,7 +21,6 @@ class AuthService {
 
   bool get isLoggedIn => _currentUser != null;
 
-  // Add the hashing method here
   String _hashPassword(String password) {
     final bytes = utf8.encode(password);
     final digest = sha256.convert(bytes);
@@ -43,7 +42,6 @@ class AuthService {
       return AuthResult(
           success: false, message: 'Username dan password tidak boleh kosong');
     }
-    // loginUser in DatabaseHelper expects raw password and hashes it for comparison
     final user = await _dbHelper.loginUser(username, password);
 
     if (user != null) {
@@ -70,7 +68,6 @@ class AuthService {
         return AuthResult(success: false, message: 'Username minimal 3 karakter');
     }
 
-    // registerUser in DatabaseHelper expects raw password and hashes it
     final success =
         await _dbHelper.registerUser(username, password, email: email);
 
@@ -105,7 +102,7 @@ class AuthService {
       return AuthResult(success: false, message: 'User tidak login');
     }
 
-    String? newHashedPasswordOpt; // Changed variable name to avoid conflict
+    String? newHashedPasswordOpt;
 
     if (newPassword != null && newPassword.isNotEmpty) {
       if (currentPassword == null || currentPassword.isEmpty) {
@@ -114,12 +111,12 @@ class AuthService {
       if (newPassword.length < 6) {
         return AuthResult(success: false, message: 'Password baru minimal 6 karakter');
       }
-      // verifyPassword in DatabaseHelper expects raw password
+
       final passwordVerified = await _dbHelper.verifyPassword(_currentUser!.id!, currentPassword);
       if (!passwordVerified) {
         return AuthResult(success: false, message: 'Password saat ini salah');
       }
-      newHashedPasswordOpt = _hashPassword(newPassword); // Use the local _hashPassword
+      newHashedPasswordOpt = _hashPassword(newPassword);
     }
 
     User updatedUser = _currentUser!.copyWith(
@@ -127,7 +124,6 @@ class AuthService {
       password: newHashedPasswordOpt ?? _currentUser!.password,
     );
 
-    // updateUser in DatabaseHelper expects a User object where password is pre-hashed
     final success = await _dbHelper.updateUser(updatedUser);
     if (success) {
       _currentUser = updatedUser;
@@ -145,7 +141,6 @@ class AuthService {
       return AuthResult(success: false, message: 'Password diperlukan untuk menghapus akun');
     }
 
-    // verifyPassword in DatabaseHelper expects raw password
     final passwordVerified = await _dbHelper.verifyPassword(_currentUser!.id!, password);
     if (!passwordVerified) {
       return AuthResult(success: false, message: 'Password salah');

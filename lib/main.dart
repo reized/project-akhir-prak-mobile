@@ -10,11 +10,9 @@ import 'theme/theme_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize AuthService
   final authService = AuthService();
   await authService.init();
 
-  // Migrate old bookmarks if user is logged in
   if (authService.isLoggedIn) {
     final bookmarkService = BookmarkService();
     await bookmarkService.migrateOldBookmarks();

@@ -138,15 +138,12 @@ class DatabaseHelper {
     }
   }
 
-  // Update user (can update email and/or password)
   Future<bool> updateUser(User user) async {
     try {
       final db = await database;
-      // Ensure the password in the user object is hashed if it's being changed
-      // The AuthService should handle providing the correctly hashed password in the User object
       final result = await db.update(
         'users',
-        user.toMap(), // User object should contain new email and/or new hashed password
+        user.toMap(), 
         where: 'id = ?',
         whereArgs: [user.id],
       );

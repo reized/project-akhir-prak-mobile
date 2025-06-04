@@ -53,14 +53,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     String? newEmail = _emailController.text.trim();
     if (newEmail == _authService.currentUser?.email) {
-      newEmail = null; // Tidak ada perubahan email
+      newEmail = null; 
     }
 
     String? currentPassword = _currentPasswordController.text;
     String? newPassword = _newPasswordController.text;
 
     if (newPassword.isEmpty) {
-      // Jika tidak ingin mengubah password
+      
       newPassword = null;
       currentPassword = null;
     }
@@ -74,10 +74,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (mounted) {
       if (result.success) {
         AppTheme.showSuccessSnackBar(context, result.message);
-        // Perbarui tampilan jika diperlukan, atau kembali ke halaman profil
-        // AuthService sudah mengupdate _currentUser internalnya
         setState(() {
-          // Jika ada perubahan email, controller akan diperbarui
+
           _emailController.text = _authService.currentUser?.email ?? '';
         });
         _currentPasswordController.clear();
@@ -187,7 +185,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     return 'Format email tidak valid';
                                   }
                                 }
-                                return null; // Email boleh kosong jika user tidak mau mengisinya
+                                return null; 
                               },
                             ),
                           ),
@@ -232,7 +230,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 ),
                               ),
                               validator: (value) {
-                                // Validasi hanya jika field password baru diisi
+                            
                                 if (_newPasswordController.text.isNotEmpty &&
                                     (value == null || value.isEmpty)) {
                                   return 'Password saat ini diperlukan untuk mengatur password baru';

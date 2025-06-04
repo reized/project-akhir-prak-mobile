@@ -46,7 +46,7 @@ class JikanAnimeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      flex: 7, // Beri lebih banyak ruang untuk gambar
+                      flex: 7,
                       child: ClipRRect(
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(12)),
@@ -62,7 +62,7 @@ class JikanAnimeCard extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      flex: 3, // Sisa ruang untuk teks
+                      flex: 3, 
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
@@ -70,7 +70,7 @@ class JikanAnimeCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 13, // Sedikit lebih kecil untuk compact
+                            fontSize: 13, 
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -109,25 +109,24 @@ class JikanAnimeCard extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      // Area teks akan mengisi sisa ruang yang tersedia dari nonCompactCardHeight
+              
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          // mainAxisAlignment: MainAxisAlignment.spaceBetween, // Jika ingin info tambahan di bawah
+                          
                           children: [
                             Text(
                               anime.title,
-                              maxLines: 2, // Bisa jadi 1 atau 2 baris
+                              maxLines: 2, 
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 16, // Ukuran font untuk grid
+                                fontSize: 16, 
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 6),
-                            // Info tambahan (rating, episode, dll.)
-                            // Kita buat ini agar tidak terlalu banyak makan tempat
+                          
                             if (anime.score != null)
                               Text(
                                 'Rating: ${anime.score!.toStringAsFixed(2)}',

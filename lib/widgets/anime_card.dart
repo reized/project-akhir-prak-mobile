@@ -29,7 +29,6 @@ class AnimeCard extends StatelessWidget {
                 if (result.videoUrl != null)
                   TextButton(
                     onPressed: () {
-                      // Buka video jika ada
                       _launchURL(context, result.videoUrl!);
                     },
                     child: Text('Lihat Cuplikan'),
@@ -46,6 +45,5 @@ class AnimeCard extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Fitur buka video belum diimplementasikan.')),
     );
-    // Bisa pakai package url_launcher kalau ingin membuka video
   }
 }
