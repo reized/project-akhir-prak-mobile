@@ -81,6 +81,56 @@ class AuthService {
       await prefs.remove(_currentUserKey);
     }
   }
+
+  // Helper method untuk mendapatkan key yang spesifik user
+  String getUserSpecificKey(String baseKey) {
+    if (_currentUser != null) {
+      return '${baseKey}_${_currentUser!.username}';
+    }
+    return baseKey; // Fallback jika tidak ada user
+  }
+
+  // Method untuk membersihkan data user saat logout
+  Future<void> clearUserData() async {
+    if (_currentUser == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final username = _currentUser!.username;
+
+    // Hapus semua data yang terkait dengan user ini
+    final keys = prefs.getKeys();
+    final userKeys = keys.where((key) => key.endsWith('_$username')).toList();
+
+    for (String key in userKeys) {
+      await prefs.remove(key);
+    }
+  }
+
+  // Method untuk migrasi data bookmark lama ke sistem baru (opsional)
+  Future<void> migrateOldBookmarks() async {
+    if (_currentUser == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    // Cek apakah ada bookmark lama yang belum dimigrasi
+    final oldBookmarks = prefs.getStringList('bookmarked_anime');
+    final oldDetailedBookmarks = prefs.getStringList('detailed_bookmarks');
+
+    if (oldBookmarks != null && oldBookmarks.isNotEmpty) {
+      // Pindahkan ke sistem baru
+      final newBookmarkKey = getUserSpecificKey('bookmarked_anime');
+      await prefs.setStringList(newBookmarkKey, oldBookmarks);
+
+      if (oldDetailedBookmarks != null && oldDetailedBookmarks.isNotEmpty) {
+        final newDetailedBookmarkKey = getUserSpecificKey('detailed_bookmarks');
+        await prefs.setStringList(newDetailedBookmarkKey, oldDetailedBookmarks);
+      }
+
+      // Hapus data lama
+      await prefs.remove('bookmarked_anime');
+      await prefs.remove('detailed_bookmarks');
+    }
+  }
 }
 
 class AuthResult {
