@@ -1,13 +1,22 @@
 import 'package:coba_project_prak/screens/main_page.dart';
+import 'package:coba_project_prak/screens/login_page.dart';
+import 'package:coba_project_prak/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+
+  // Initialize AuthService
+  final authService = AuthService();
+  await authService.init();
+
+  runApp(MyApp(isLoggedIn: authService.isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +25,9 @@ class MyApp extends StatelessWidget {
       title: 'Whatnime',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
-      home: MainPage(),
+      home: isLoggedIn ? const MainPage() : const LoginPage(),
     );
   }
 }
