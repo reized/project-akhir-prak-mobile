@@ -123,115 +123,137 @@ class _LibraryPageState extends State<LibraryPage> {
     _loadAllAnime();
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      _allAnime.clear();
+      _currentPage = 1;
+      _hasMore = true;
+      _isLoadingMore = false;
+      _searchController.clear();
+      _isSearching = false;
+      _searchResults = [];
+    });
+
+    // Reload semua data
+    _seasonAnimeFuture = JikanApi.getSeasonNowAnime();
+    _topRatedAnimeFuture = JikanApi.getTopAnime(type: 'bypopularity');
+    _topAnimeFuture = JikanApi.getTopAnime(type: 'favorite');
+    _genresFuture = JikanApi.getGenres();
+    await _loadAllAnime();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Search Bar
-              TextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                decoration: InputDecoration(
-                  labelText: 'Cari Anime...',
-                  hintText: 'Misal: Naruto, Attack on Titan',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Search Bar
+                TextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  decoration: InputDecoration(
+                    labelText: 'Cari Anime...',
+                    hintText: 'Misal: Naruto, Attack on Titan',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              _onSearchChanged('');
+                            },
+                          )
+                        : null,
                   ),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            _onSearchChanged('');
-                          },
-                        )
-                      : null,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              if (_isSearching)
-                _buildSearchResults()
-              else ...[
-                // Current Season Anime Carousel
-                _buildSectionHeader('Sedang Tayang Musim Ini'),
-                _buildAnimeCarousel(_seasonAnimeFuture),
-                const SizedBox(height: 20),
-
-                // Top Rated Anime Carousel
-                _buildSectionHeader('Rating Teratas'),
-                _buildAnimeCarousel(_topRatedAnimeFuture),
-                const SizedBox(height: 20),
-
-                // Top Anime (Overall) Carousel
-                _buildSectionHeader('Anime Terbaik'),
-                _buildAnimeCarousel(_topAnimeFuture),
-                const SizedBox(height: 20),
-
-                // Genre Filter
-                _buildSectionHeader('Filter Genre'),
-                FutureBuilder<List<Genre>>(
-                  future: _genresFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(
-                          child:
-                              Text('Error loading genres: ${snapshot.error}'));
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No genres found.'));
-                    }
-
-                    final genres = snapshot.data!;
-                    return DropdownButtonFormField<int?>(
-                      value: _selectedGenreId,
-                      hint: const Text('Pilih Genre'),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      items: [
-                        const DropdownMenuItem<int?>(
-                          value: null,
-                          child: Text('Semua Genre'),
-                        ),
-                        ...genres.map((genre) => DropdownMenuItem<int>(
-                              value: genre.malId,
-                              child: Text(genre.name),
-                            )),
-                      ],
-                      onChanged: _applyGenreFilter,
-                    );
-                  },
                 ),
                 const SizedBox(height: 20),
 
-                // Discover Anime (All Anime List)
-                _buildSectionHeader('Semua Anime'),
-                _buildAllAnimeGrid(),
-                if (_isLoadingMore)
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(child: CircularProgressIndicator()),
+                if (_isSearching)
+                  _buildSearchResults()
+                else ...[
+                  // Current Season Anime Carousel
+                  _buildSectionHeader('Sedang Tayang Musim Ini'),
+                  _buildAnimeCarousel(_seasonAnimeFuture),
+                  const SizedBox(height: 20),
+
+                  // Top Rated Anime Carousel
+                  _buildSectionHeader('Rating Teratas'),
+                  _buildAnimeCarousel(_topRatedAnimeFuture),
+                  const SizedBox(height: 20),
+
+                  // Top Anime (Overall) Carousel
+                  _buildSectionHeader('Anime Terbaik'),
+                  _buildAnimeCarousel(_topAnimeFuture),
+                  const SizedBox(height: 20),
+
+                  // Genre Filter
+                  _buildSectionHeader('Filter Genre'),
+                  FutureBuilder<List<Genre>>(
+                    future: _genresFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(
+                            child: Text(
+                                'Error loading genres: ${snapshot.error}'));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(child: Text('No genres found.'));
+                      }
+
+                      final genres = snapshot.data!;
+                      return DropdownButtonFormField<int?>(
+                        value: _selectedGenreId,
+                        hint: const Text('Pilih Genre'),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                        ),
+                        items: [
+                          const DropdownMenuItem<int?>(
+                            value: null,
+                            child: Text('Semua Genre'),
+                          ),
+                          ...genres.map((genre) => DropdownMenuItem<int>(
+                                value: genre.malId,
+                                child: Text(genre.name),
+                              )),
+                        ],
+                        onChanged: _applyGenreFilter,
+                      );
+                    },
                   ),
-                if (!_hasMore && _allAnime.isNotEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(child: Text('Semua anime telah dimuat.')),
-                  ),
+                  const SizedBox(height: 20),
+
+                  // Discover Anime (All Anime List)
+                  _buildSectionHeader('Semua Anime'),
+                  _buildAllAnimeGrid(),
+                  if (_isLoadingMore)
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  if (!_hasMore && _allAnime.isNotEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(child: Text('Semua anime telah dimuat.')),
+                    ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

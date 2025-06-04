@@ -223,7 +223,7 @@ class AppTheme {
       iconTheme: IconThemeData(color: primaryColor),
       titleTextStyle: TextStyle(
         color: lightTextPrimary,
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -288,7 +288,7 @@ class AppTheme {
       iconTheme: IconThemeData(color: primaryColor),
       titleTextStyle: TextStyle(
         color: darkTextPrimary,
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: FontWeight.bold,
       ),
     ),
