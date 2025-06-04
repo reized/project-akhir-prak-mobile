@@ -174,28 +174,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // 3. Fungsi untuk navigasi ke EditProfilePage dan memicu refresh saat kembali
   void _navigateToEditProfile() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const EditProfilePage()),
     );
 
-    // Setelah kembali dari EditProfilePage, panggil setState untuk refresh.
-    // Kita tidak perlu 'result' di sini, hanya perlu tahu bahwa kita kembali.
     if (mounted) {
-      // Pastikan widget masih ada di tree
+
       setState(() {
-        // State di sini akan mengambil _authService.currentUser yang terbaru
-        // dan build method akan menggunakan nilai baru tersebut.
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // final authService = AuthService(); // Gunakan instance _authService dari state
     final user =
-        _authService.currentUser; // Data pengguna diambil dari _authService
-
+        _authService.currentUser; 
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

@@ -222,7 +222,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
