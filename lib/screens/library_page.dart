@@ -20,7 +20,7 @@ class _LibraryPageState extends State<LibraryPage> {
   late Future<List<Anime>> _topAnimeFuture;
   late Future<List<Genre>> _genresFuture;
 
-  List<Anime> _allAnime = [];
+  final List<Anime> _allAnime = [];
   int _currentPage = 1;
   bool _isLoadingMore = false;
   bool _hasMore = true;
