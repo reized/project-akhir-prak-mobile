@@ -59,9 +59,7 @@ class _BookmarkListPageState extends State<BookmarkListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bookmark ${currentUser?.username ?? ""}'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
+        title: Text('Bookmark'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

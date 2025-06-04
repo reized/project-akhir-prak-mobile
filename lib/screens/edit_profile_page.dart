@@ -96,42 +96,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Profil'),
+      ),
       body: Container(
         decoration: AppTheme.getGradientBackground(isDark),
         child: SafeArea(
           child: Column(
             children: [
-              // Custom App Bar
-              Padding(
-                padding: const EdgeInsets.all(AppTheme.spacingM),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(AppTheme.spacingS),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppTheme.spacingM),
-                    Text(
-                      'Edit Profil',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               // Content
               Expanded(
                 child: SingleChildScrollView(
