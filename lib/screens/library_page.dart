@@ -308,7 +308,7 @@ class _LibraryPageState extends State<LibraryPage> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.54, // Sesuaikan rasio sesuai kebutuhan
+        childAspectRatio: 0.53, // Sesuaikan rasio sesuai kebutuhan
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),

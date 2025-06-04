@@ -68,14 +68,6 @@ class _RegisterPageState extends State<RegisterPage> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       body: Container(
         decoration: AppTheme.getGradientBackground(isDark),
         child: SafeArea(
@@ -90,7 +82,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     // Logo/Title
                     Icon(
-                      Icons.person_add_outlined,
+                      Icons.movie_outlined,
                       size: 80,
                       color: AppTheme.primaryColor,
                     ),

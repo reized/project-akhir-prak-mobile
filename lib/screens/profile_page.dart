@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'bookmark_list_page.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_provider.dart';
 import 'login_page.dart';
 import 'edit_profile_page.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final Function(bool)? onThemeChanged;
+
+  const ProfilePage({super.key, this.onThemeChanged});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -159,11 +163,16 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void _toggleTheme(bool isDarkMode) {
+    context.read<ThemeProvider>().toggleTheme();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
     final user = _authService.currentUser;
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: Container(
@@ -266,6 +275,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: _navigateToEditProfile,
                       ),
                       const SizedBox(height: AppTheme.spacingM),
+                      // Theme Toggle Option
+                      _buildThemeToggleOption(context, isDark: isDark),
+                      const SizedBox(height: AppTheme.spacingM),
                       _buildMenuOption(
                         context,
                         icon: Icons.delete_outline,
@@ -300,6 +312,66 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeToggleOption(BuildContext context, {required bool isDark}) {
+    return Material(
+      color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+      borderRadius: BorderRadius.circular(AppTheme.radiusM),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacingM,
+          vertical: AppTheme.spacingM,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spacingS + 2),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(AppTheme.spacingS + 2),
+              ),
+              child: Icon(
+                isDark ? Icons.dark_mode : Icons.light_mode,
+                color: AppTheme.primaryColor,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacingM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Mode Gelap',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppTheme.spacingXS / 2),
+                  Text(
+                    isDark
+                        ? 'Aktif - Tema gelap digunakan'
+                        : 'Nonaktif - Tema terang digunakan',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.lightTextSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              value: isDark,
+              onChanged: _toggleTheme,
+              activeColor: AppTheme.primaryColor,
+              activeTrackColor: AppTheme.primaryColor.withOpacity(0.3),
+              inactiveThumbColor: Colors.grey[400],
+              inactiveTrackColor: Colors.grey[300],
+            ),
+          ],
         ),
       ),
     );

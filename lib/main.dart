@@ -4,6 +4,8 @@ import 'package:coba_project_prak/services/auth_service.dart';
 import 'package:coba_project_prak/services/bookmark_service.dart';
 import 'package:coba_project_prak/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'theme/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,23 +20,37 @@ void main() async {
     await bookmarkService.migrateOldBookmarks();
   }
 
-  runApp(MyApp(isLoggedIn: authService.isLoggedIn));
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-
-  const MyApp({super.key, required this.isLoggedIn});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Whatnime',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
-      home: isLoggedIn ? const MainPage() : const LoginPage(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'Whatnime',
+          debugShowCheckedModeBanner: false,
+          theme: themeProvider.currentTheme,
+          home: FutureBuilder<bool>(
+            future: Future.value(AuthService().isLoggedIn),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final isLoggedIn = snapshot.data ?? false;
+              return isLoggedIn ? const MainPage() : const LoginPage();
+            },
+          ),
+        );
+      },
     );
   }
 }
