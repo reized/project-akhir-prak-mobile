@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 import 'register_page.dart';
 import 'main_page.dart';
 
@@ -45,28 +46,15 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (_) => const MainPage()),
         );
       } else {
-        _showSnackBar(result.message, isError: true);
+        AppTheme.showErrorSnackBar(context, result.message);
       }
     } catch (e) {
       if (mounted) {
-        _showSnackBar('Terjadi kesalahan: $e', isError: true);
+        AppTheme.showErrorSnackBar(context, 'Terjadi kesalahan: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red[400] : Colors.green[400],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
   }
 
   @override
@@ -76,19 +64,11 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: isDark
-                ? [Colors.grey[900]!, Colors.black]
-                : [Colors.deepPurple[50]!, Colors.white],
-          ),
-        ),
+        decoration: AppTheme.getGradientBackground(isDark),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppTheme.spacingL),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -99,42 +79,40 @@ class _LoginPageState extends State<LoginPage> {
                     Icon(
                       Icons.movie_outlined,
                       size: 80,
-                      color: Colors.deepPurple,
+                      color: AppTheme.primaryColor,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppTheme.spacingM),
                     Text(
                       'Whatnime',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
+                        color: AppTheme.primaryColor,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppTheme.spacingS),
                     Text(
                       'Masuk ke akun Anda',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
+                        color: isDark
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.lightTextSecondary,
                       ),
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: AppTheme.spacingXXL),
 
                     // Username Field
                     Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spacingM),
                         child: TextFormField(
                           controller: _usernameController,
-                          decoration: const InputDecoration(
+                          decoration: AppTheme.getInputDecoration(
                             labelText: 'Username',
                             hintText: 'Masukkan username',
-                            prefixIcon: Icon(Icons.person_outline),
-                            border: InputBorder.none,
+                            prefixIcon: Icons.person_outline,
+                            isDark: isDark,
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -146,23 +124,22 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppTheme.spacingM),
 
                     // Password Field
                     Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spacingM),
                         child: TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          decoration: InputDecoration(
+                          decoration: AppTheme.getInputDecoration(
                             labelText: 'Password',
                             hintText: 'Masukkan password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: Icons.lock_outline,
+                            isDark: isDark,
+                          ).copyWith(
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
@@ -175,7 +152,6 @@ class _LoginPageState extends State<LoginPage> {
                                 });
                               },
                             ),
-                            border: InputBorder.none,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -188,22 +164,14 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppTheme.spacingXL),
 
                     // Login Button
                     SizedBox(
                       height: 56,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 8,
-                          shadowColor: Colors.deepPurple.withOpacity(0.3),
-                        ),
+                        style: AppTheme.primaryButtonStyle,
                         child: _isLoading
                             ? const SizedBox(
                                 width: 24,
@@ -215,16 +183,10 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                               )
-                            : const Text(
-                                'Masuk',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                            : const Text('Masuk'),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppTheme.spacingL),
 
                     // Register Link
                     TextButton(
@@ -244,7 +206,7 @@ class _LoginPageState extends State<LoginPage> {
                             TextSpan(
                               text: 'Daftar di sini',
                               style: TextStyle(
-                                color: Colors.deepPurple,
+                                color: AppTheme.primaryColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

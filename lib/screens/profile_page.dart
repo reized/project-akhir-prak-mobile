@@ -1,11 +1,10 @@
-// screens/profile_page.dart
 import 'package:flutter/material.dart';
 import 'bookmark_list_page.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 import 'login_page.dart';
 import 'edit_profile_page.dart';
 
-// 1. Ubah menjadi StatefulWidget
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -14,25 +13,17 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // 2. Buat State class
-  final AuthService _authService = AuthService(); // Simpan instance AuthService
-
-  // Metode _showLogoutDialog dan _showDeleteAccountDialog bisa tetap di sini
-  // atau dipindahkan ke dalam _ProfilePageState jika mereka memodifikasi state lokal.
-  // Untuk saat ini, kita anggap mereka tidak memodifikasi state lokal ProfilePage
-  // selain navigasi atau menampilkan dialog.
+  final AuthService _authService = AuthService();
 
   void _showLogoutDialog(BuildContext context) {
-    // ... (implementasi _showLogoutDialog tetap sama)
-    // Gunakan widget.key jika diperlukan, atau context yang di-pass
     showDialog(
-      context: context, // context dari build method atau parameter
+      context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Konfirmasi Logout'),
           content: const Text('Apakah Anda yakin ingin keluar dari akun?'),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppTheme.radiusL),
           ),
           actions: [
             TextButton(
@@ -42,8 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ElevatedButton(
               onPressed: () async {
                 Navigator.pop(dialogContext);
-                await _authService.logout(); // Gunakan instance _authService
-                // Gunakan context dari widget, bukan parameter yg mungkin sudah tidak valid
+                await _authService.logout();
                 if (mounted && Navigator.of(this.context).canPop()) {
                   Navigator.pushAndRemoveUntil(
                     this.context,
@@ -55,10 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       MaterialPageRoute(builder: (_) => const LoginPage()));
                 }
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
+              style: AppTheme.dangerButtonStyle,
               child: const Text('Logout'),
             ),
           ],
@@ -68,18 +55,15 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
-    // ... (implementasi _showDeleteAccountDialog tetap sama)
-    // Gunakan widget.key jika diperlukan, atau context yang di-pass
     final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     bool isLoadingDialog = false;
 
     showDialog(
-      context: context, // context dari build method atau parameter
+      context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(builder: (buildContext, setStateDialog) {
-          // Ganti nama context di sini agar tidak bentrok
           return AlertDialog(
             title: const Text('Hapus Akun'),
             content: Form(
@@ -89,14 +73,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   const Text(
                       'Apakah Anda yakin ingin menghapus akun ini secara permanen? Tindakan ini tidak dapat diurungkan.'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppTheme.spacingM),
                   TextFormField(
                     controller: passwordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Masukkan Password Anda',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                      ),
+                      prefixIcon: const Icon(Icons.lock_outline),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -108,8 +94,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             ),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusL),
+            ),
             actions: [
               TextButton(
                 onPressed:
@@ -122,7 +109,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     : () async {
                         if (formKey.currentState!.validate()) {
                           setStateDialog(() => isLoadingDialog = true);
-                          // final authService = AuthService(); // Sudah ada _authService
                           final result =
                               await _authService.deleteCurrentUserAccount(
                                   passwordController.text);
@@ -130,33 +116,23 @@ class _ProfilePageState extends State<ProfilePage> {
                           Navigator.pop(dialogContext);
 
                           if (mounted) {
-                            // Cek mounted sebelum menggunakan context utama
                             if (result.success) {
-                              ScaffoldMessenger.of(this.context).showSnackBar(
-                                // Gunakan this.context
-                                SnackBar(
-                                    content: Text(result.message),
-                                    backgroundColor: Colors.green),
-                              );
+                              AppTheme.showSuccessSnackBar(
+                                  this.context, result.message);
                               Navigator.pushAndRemoveUntil(
-                                this.context, // Gunakan this.context
+                                this.context,
                                 MaterialPageRoute(
                                     builder: (_) => const LoginPage()),
                                 (route) => false,
                               );
                             } else {
-                              ScaffoldMessenger.of(this.context).showSnackBar(
-                                // Gunakan this.context
-                                SnackBar(
-                                    content: Text(result.message),
-                                    backgroundColor: Colors.red),
-                              );
+                              AppTheme.showErrorSnackBar(
+                                  this.context, result.message);
                             }
                           }
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red, foregroundColor: Colors.white),
+                style: AppTheme.dangerButtonStyle,
                 child: isLoadingDialog
                     ? const SizedBox(
                         width: 20,
@@ -172,7 +148,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // 3. Fungsi untuk navigasi ke EditProfilePage dan memicu refresh saat kembali
   void _navigateToEditProfile() async {
     await Navigator.push(
       context,
@@ -180,51 +155,34 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (mounted) {
-
-      setState(() {
-      });
+      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user =
-        _authService.currentUser; 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final user = _authService.currentUser;
+
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: Theme.of(context).brightness == Brightness.dark
-                ? [Colors.grey[900]!, Colors.black]
-                : [Colors.deepPurple[50]!, Colors.white],
-          ),
-        ),
+        decoration: AppTheme.getGradientBackground(isDark),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppTheme.spacingL),
             child: Column(
               children: [
-                // Profile Header (menggunakan 'user' dari state)
+                // Profile Header
                 Container(
-                  padding: const EdgeInsets.all(30),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
+                  padding: const EdgeInsets.all(AppTheme.spacingXL),
+                  decoration: AppTheme.getCardDecoration(
+                      isDark: isDark, borderRadius: AppTheme.radiusXL),
                   child: Column(
                     children: [
                       CircleAvatar(
                         radius: 50,
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: AppTheme.primaryColor,
                         child: Text(
                           user?.username.substring(0, 1).toUpperCase() ?? 'U',
                           style: const TextStyle(
@@ -234,37 +192,36 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppTheme.spacingM),
                       Text(
                         user?.username ?? 'Unknown User',
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: theme.textTheme.headlineSmall,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppTheme.spacingS),
                       if (user?.email != null && user!.email!.isNotEmpty)
                         Text(
-                          user.email!, // Ini akan menampilkan email terbaru setelah setState
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
+                          user.email!,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isDark
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.lightTextSecondary,
+                          ),
                         ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppTheme.spacingS),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                          horizontal: AppTheme.spacingM,
+                          vertical: AppTheme.spacingXS,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green[100],
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppTheme.successColor.withOpacity(0.1),
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.radiusCircular),
                         ),
                         child: Text(
                           'Bergabung ${_formatDate(user?.createdAt ?? DateTime.now())}',
                           style: TextStyle(
-                            color: Colors.green[700],
+                            color: AppTheme.successColor,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -274,9 +231,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppTheme.spacingL),
                 const Divider(),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppTheme.spacingS),
 
                 // Menu Options
                 Expanded(
@@ -288,6 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         title: 'Bookmark Anime',
                         subtitle: 'Lihat daftar anime favorit Anda',
                         color: Colors.orange,
+                        isDark: isDark,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -297,25 +255,25 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppTheme.spacingM),
                       _buildMenuOption(
                         context,
                         icon: Icons.person_outline,
                         title: 'Personal Data',
                         subtitle: 'Edit data personal Anda',
-                        color: Colors.blue,
-                        onTap:
-                            _navigateToEditProfile, // 4. Gunakan fungsi navigasi baru
+                        color: AppTheme.infoColor,
+                        isDark: isDark,
+                        onTap: _navigateToEditProfile,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppTheme.spacingM),
                       _buildMenuOption(
                         context,
                         icon: Icons.delete_outline,
                         title: 'Hapus Akun',
                         subtitle: 'Hapus akun Anda secara permanen',
-                        color: Colors.red.shade700,
-                        onTap: () => _showDeleteAccountDialog(
-                            context), // Pass context dari build method
+                        color: AppTheme.errorColor,
+                        isDark: isDark,
+                        onTap: () => _showDeleteAccountDialog(context),
                       ),
                     ],
                   ),
@@ -326,19 +284,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton.icon(
-                    onPressed: () => _showLogoutDialog(
-                        context), // Pass context dari build method
+                    onPressed: () => _showLogoutDialog(context),
                     icon: const Icon(Icons.logout),
                     label: const Text('LOGOUT'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                    style: AppTheme.dangerButtonStyle.copyWith(
+                      shape: WidgetStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.radiusCircular),
+                        ),
                       ),
-                      elevation: 4,
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -356,26 +311,27 @@ class _ProfilePageState extends State<ProfilePage> {
     required String title,
     required String subtitle,
     required Color color,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(12),
+      color: isDark ? AppTheme.darkCardColor : AppTheme.lightCardColor,
+      borderRadius: BorderRadius.circular(AppTheme.radiusM),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.spacingM,
+            vertical: AppTheme.spacingM,
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(AppTheme.spacingS + 2),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppTheme.spacingS + 2),
                 ),
                 child: Icon(
                   icon,
@@ -383,32 +339,32 @@ class _ProfilePageState extends State<ProfilePage> {
                   size: 22,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppTheme.spacingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppTheme.spacingXS / 2),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.lightTextSecondary,
+                          ),
                     ),
                   ],
                 ),
               ),
               Icon(
                 Icons.arrow_forward_ios,
-                color: Colors.grey[400],
+                color: isDark
+                    ? AppTheme.darkTextSecondary
+                    : AppTheme.lightTextSecondary,
                 size: 16,
               ),
             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -46,32 +47,19 @@ class _RegisterPageState extends State<RegisterPage> {
       if (!mounted) return;
 
       if (result.success) {
-        _showSnackBar(result.message, isError: false);
+        AppTheme.showSuccessSnackBar(context, result.message);
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) Navigator.pop(context);
       } else {
-        _showSnackBar(result.message, isError: true);
+        AppTheme.showErrorSnackBar(context, result.message);
       }
     } catch (e) {
       if (mounted) {
-        _showSnackBar('Terjadi kesalahan: $e', isError: true);
+        AppTheme.showErrorSnackBar(context, 'Terjadi kesalahan: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red[400] : Colors.green[400],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
   }
 
   @override
@@ -84,27 +72,16 @@ class _RegisterPageState extends State<RegisterPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.deepPurple,
-          ),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: isDark
-                ? [Colors.grey[900]!, Colors.black]
-                : [Colors.deepPurple[50]!, Colors.white],
-          ),
-        ),
+        decoration: AppTheme.getGradientBackground(isDark),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppTheme.spacingL),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -115,42 +92,40 @@ class _RegisterPageState extends State<RegisterPage> {
                     Icon(
                       Icons.person_add_outlined,
                       size: 80,
-                      color: Colors.deepPurple,
+                      color: AppTheme.primaryColor,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppTheme.spacingM),
                     Text(
                       'Daftar Akun',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
+                        color: AppTheme.primaryColor,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppTheme.spacingS),
                     Text(
                       'Buat akun baru untuk melanjutkan',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
+                        color: isDark
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.lightTextSecondary,
                       ),
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: AppTheme.spacingXXL),
 
                     // Username Field
                     Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spacingM),
                         child: TextFormField(
                           controller: _usernameController,
-                          decoration: const InputDecoration(
+                          decoration: AppTheme.getInputDecoration(
                             labelText: 'Username',
                             hintText: 'Masukkan username',
-                            prefixIcon: Icon(Icons.person_outline),
-                            border: InputBorder.none,
+                            prefixIcon: Icons.person_outline,
+                            isDark: isDark,
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -165,23 +140,20 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppTheme.spacingM),
 
-                    // Email Field (Optional)
+                    // Email Field
                     Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spacingM),
                         child: TextFormField(
                           controller: _emailController,
-                          decoration: const InputDecoration(
+                          decoration: AppTheme.getInputDecoration(
                             labelText: 'Email (Opsional)',
                             hintText: 'Masukkan email',
-                            prefixIcon: Icon(Icons.email_outlined),
-                            border: InputBorder.none,
+                            prefixIcon: Icons.email_outlined,
+                            isDark: isDark,
                           ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
@@ -197,23 +169,22 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppTheme.spacingM),
 
                     // Password Field
                     Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spacingM),
                         child: TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          decoration: InputDecoration(
+                          decoration: AppTheme.getInputDecoration(
                             labelText: 'Password',
                             hintText: 'Masukkan password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: Icons.lock_outline,
+                            isDark: isDark,
+                          ).copyWith(
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
@@ -226,7 +197,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                 });
                               },
                             ),
-                            border: InputBorder.none,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -241,23 +211,22 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppTheme.spacingM),
 
                     // Confirm Password Field
                     Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spacingM),
                         child: TextFormField(
                           controller: _confirmPasswordController,
                           obscureText: _obscureConfirmPassword,
-                          decoration: InputDecoration(
+                          decoration: AppTheme.getInputDecoration(
                             labelText: 'Konfirmasi Password',
                             hintText: 'Masukkan ulang password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: Icons.lock_outline,
+                            isDark: isDark,
+                          ).copyWith(
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureConfirmPassword
@@ -271,7 +240,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                 });
                               },
                             ),
-                            border: InputBorder.none,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -287,22 +255,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppTheme.spacingXL),
 
                     // Register Button
                     SizedBox(
                       height: 56,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _register,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 8,
-                          shadowColor: Colors.deepPurple.withOpacity(0.3),
-                        ),
+                        style: AppTheme.primaryButtonStyle,
                         child: _isLoading
                             ? const SizedBox(
                                 width: 24,
@@ -314,16 +274,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                 ),
                               )
-                            : const Text(
-                                'Daftar',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                            : const Text('Daftar'),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppTheme.spacingL),
 
                     // Login Link
                     TextButton(
@@ -336,7 +290,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             TextSpan(
                               text: 'Masuk di sini',
                               style: TextStyle(
-                                color: Colors.deepPurple,
+                                color: AppTheme.primaryColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
