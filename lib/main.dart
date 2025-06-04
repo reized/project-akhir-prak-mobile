@@ -2,6 +2,7 @@ import 'package:coba_project_prak/screens/main_page.dart';
 import 'package:coba_project_prak/screens/login_page.dart';
 import 'package:coba_project_prak/services/auth_service.dart';
 import 'package:coba_project_prak/services/bookmark_service.dart';
+import 'package:coba_project_prak/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -30,10 +31,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Whatnime',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.light,
       home: isLoggedIn ? const MainPage() : const LoginPage(),
     );
   }
