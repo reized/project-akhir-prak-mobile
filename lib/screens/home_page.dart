@@ -3,6 +3,7 @@ import 'package:coba_project_prak/screens/result_page.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/tracemoe_api.dart';
+import '../services/auth_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -199,6 +200,7 @@ class _HomeScreenState extends State<HomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final user = AuthService().currentUser;
 
     return Scaffold(
       body: Container(
@@ -219,7 +221,7 @@ class _HomeScreenState extends State<HomePage> with TickerProviderStateMixin {
               children: [
                 // Header
                 Text(
-                  'Whatnime',
+                  'Welcome, ${user?.username ?? 'user'}!',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -228,7 +230,7 @@ class _HomeScreenState extends State<HomePage> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Temukan anime dari screenshot!',
+                  'Temukan anime yang kamu cari!',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.grey[600],
