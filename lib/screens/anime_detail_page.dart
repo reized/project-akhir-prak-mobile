@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import '../models/anime_jikan_model.dart';
 import '../services/jikan_api.dart';
+import '../services/bookmark_service.dart';
 
 class AnimeDetailPage extends StatefulWidget {
   final int animeId;
@@ -18,7 +17,8 @@ class AnimeDetailPage extends StatefulWidget {
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
   late Future<Anime> _animeDetailsFuture;
   bool _isBookmarked = false;
-  Anime? _anime; // To store the fetched anime object
+  Anime? _anime;
+  final BookmarkService _bookmarkService = BookmarkService();
 
   @override
   void initState() {
@@ -28,47 +28,37 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   }
 
   Future<void> _checkBookmarkStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final bookmarks = prefs.getStringList('bookmarked_anime') ?? [];
+    final isBookmarked = await _bookmarkService.isBookmarked(widget.animeId);
     setState(() {
-      _isBookmarked = bookmarks.contains(widget.animeId.toString());
+      _isBookmarked = isBookmarked;
     });
   }
 
   Future<void> _toggleBookmark() async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String> bookmarks = prefs.getStringList('bookmarked_anime') ?? [];
+    if (_anime == null) return;
 
-    if (_isBookmarked) {
-      bookmarks.remove(widget.animeId.toString());
-      if (_anime != null) {
-        // Also remove from detailed bookmark list if exists
-        List<String> detailedBookmarks = prefs.getStringList('detailed_bookmarks') ?? [];
-        detailedBookmarks.removeWhere((item) {
-          final Map<String, dynamic> itemJson = json.decode(item);
-          return itemJson['mal_id'] == _anime!.malId;
-        });
-        await prefs.setStringList('detailed_bookmarks', detailedBookmarks);
-      }
+    final success = await _bookmarkService.toggleBookmark(_anime!);
+
+    if (success) {
+      setState(() {
+        _isBookmarked = !_isBookmarked;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isBookmarked
+              ? 'Ditambahkan ke Bookmark!'
+              : 'Dihapus dari Bookmark!'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
     } else {
-      bookmarks.add(widget.animeId.toString());
-      if (_anime != null) {
-        // Add detailed info for displaying in profile page
-        List<String> detailedBookmarks = prefs.getStringList('detailed_bookmarks') ?? [];
-        detailedBookmarks.add(json.encode(_anime!.toJson()));
-        await prefs.setStringList('detailed_bookmarks', detailedBookmarks);
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal mengubah bookmark'),
+          duration: Duration(seconds: 1),
+        ),
+      );
     }
-    await prefs.setStringList('bookmarked_anime', bookmarks);
-    setState(() {
-      _isBookmarked = !_isBookmarked;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isBookmarked ? 'Ditambahkan ke Bookmark!' : 'Dihapus dari Bookmark!'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
   }
 
   Future<void> _launchURL(String url) async {
@@ -108,7 +98,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
             return const Center(child: Text('Anime tidak ditemukan.'));
           }
 
-          _anime = snapshot.data; // Store the fetched anime
+          _anime = snapshot.data;
           final anime = snapshot.data!;
 
           return SingleChildScrollView(
@@ -146,11 +136,13 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                   ),
                 const SizedBox(height: 15),
                 _buildInfoRow('Episodes', anime.episodes?.toString() ?? 'N/A'),
-                _buildInfoRow('Score', anime.score?.toStringAsFixed(2) ?? 'N/A'),
+                _buildInfoRow(
+                    'Score', anime.score?.toStringAsFixed(2) ?? 'N/A'),
                 _buildInfoRow('Rank', anime.rank?.toString() ?? 'N/A'),
-                _buildInfoRow('Popularity', anime.popularity?.toString() ?? 'N/A'),
-                _buildInfoRow('Genres', anime.genres.join(', ') ),
-                _buildInfoRow('Studios', anime.studios.join(', ') ),
+                _buildInfoRow(
+                    'Popularity', anime.popularity?.toString() ?? 'N/A'),
+                _buildInfoRow('Genres', anime.genres.join(', ')),
+                _buildInfoRow('Studios', anime.studios.join(', ')),
                 const SizedBox(height: 20),
                 Text(
                   'Tonton Sekarang:',
@@ -177,8 +169,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                   )
                 else
                   ElevatedButton.icon(
-                    onPressed: () =>
-                        _launchURL('https://www.youtube.com/results?search_query=${anime.title} anime'),
+                    onPressed: () => _launchURL(
+                        'https://www.youtube.com/results?search_query=${anime.title} anime'),
                     icon: const Icon(Icons.ondemand_video),
                     label: const Text('Cari di YouTube'),
                     style: ElevatedButton.styleFrom(
